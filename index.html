@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UnLua Docs</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white font-sans">
+  <div class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold mb-4">UnLua Function Reference</h1>
+    <input id="search" type="text" placeholder="Search for a function..."
+           class="w-full p-2 mb-4 rounded bg-gray-800 border border-gray-700 text-white">
+
+    <div id="results" class="space-y-4"></div>
+  </div>
+
+  <script>
+    let functions = [];
+
+    async function fetchData() {
+      const response = await fetch('unlua_functions.json');
+      functions = await response.json();
+      displayFunctions(functions);
+    }
+
+    function displayFunctions(funcs) {
+      const container = document.getElementById('results');
+      container.innerHTML = '';
+
+      funcs.forEach(fn => {
+        const params = fn.parameters.length ? `(${fn.parameters.join(', ')})` : '()';
+        container.innerHTML += `
+          <div class="bg-gray-800 p-4 rounded shadow">
+            <div class="text-xl font-semibold text-blue-400">${fn.class}.${fn.name}${params}</div>
+            <div class="text-sm text-gray-300 mt-1">${fn.description}</div>
+          </div>
+        `;
+      });
+    }
+
+    document.getElementById('search').addEventListener('input', e => {
+      const query = e.target.value.toLowerCase();
+      const filtered = functions.filter(f =>
+        f.name.toLowerCase().includes(query) ||
+        f.class.toLowerCase().includes(query) ||
+        f.description.toLowerCase().includes(query)
+      );
+      displayFunctions(filtered);
+    });
+
+    fetchData();
+  </script>
+</body>
+</html>

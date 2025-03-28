@@ -164,6 +164,40 @@
         vertical-align: middle;
         color: inherit;
       }
+
+      .example-code-wrapper {
+        position: relative;
+        background-color: var(--md-dark-surface-container-low);
+        border-radius: 6px;
+        overflow: hidden;
+        padding: 0.75rem 1rem;
+      }
+      
+      .example-code {
+        font-family: "Courier New", monospace;
+        font-size: 0.95rem;
+        color: var(--md-dark-on-surface);
+        white-space: pre-wrap;
+        margin: 0;
+      }
+      
+      .copy-button {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: none;
+        border: none;
+        color: var(--md-dark-on-surface-variant);
+        font-size: 0.9rem;
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      
+      .copy-button:hover {
+        background-color: var(--md-dark-surface-container-highest);
+      }
+      
     </style>
   </head>
   <body>
@@ -269,18 +303,55 @@
           `
           : "";
       
+        const exampleCode = (() => {
+          const params = paramLines.map(p => p[1]).join(', ');
+          const className = func.class;
+          const functionName = func.name.includes("::") ? func.name.split("::").pop() : func.name;
+          const isVoid = returnLine ? returnLine[1].trim().toLowerCase() === 'void' : true;
+      
+          const code = isVoid
+            ? `UE.${className}.${functionName}(${params})`
+            : `local result = UE.${className}.${functionName}(${params})`;
+      
+          return `
+            <div class="section">
+              <h3><span class="material-icons">code</span> Example</h3>
+              <div class="example-code-wrapper">
+                <pre class="example-code" id="code-${func.id}"><code>${code}</code></pre>
+                <button class="copy-button" onclick="copyCode('code-${func.id}')">Copy</button>
+              </div>
+            </div>
+          `;
+        })();
+      
         return `
           <div class="function-detail-card">
             <h2 class="function-name"><span class="material-icons">functions</span> ${func.name}</h2>
             <div class="function-class"><span class="material-icons">category</span> ${func.class}</div>
+      
             <div class="section">
               <h3><span class="material-icons">description</span> Description</h3>
               <p class="function-description">${mainDesc}</p>
             </div>
+      
             ${paramList}
             ${returnSection}
+            ${exampleCode}
           </div>
         `;
+      }
+
+      function copyCode(elementId) {
+        const codeElement = document.getElementById(elementId);
+        if (!codeElement) return;
+      
+        const text = codeElement.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          const button = codeElement.nextElementSibling;
+          const originalText = button.innerText;
+          button.innerText = "Copied!";
+          setTimeout(() => (button.innerText = originalText), 1000);
+        });
       }
 
       function handleSearch() {

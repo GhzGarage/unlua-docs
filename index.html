@@ -4,7 +4,9 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>UnLua Docs</title>
+        <link rel="stylesheet" href="styleguide.css" />
         <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
         <script src="https://cdn.tailwindcss.com"></script>
         <script>
             tailwind.config = {
@@ -23,41 +25,65 @@
             };
         </script>
         <style>
+            body {
+                background-color: var(--md-dark-surface);
+                color: var(--md-dark-on-surface);
+                font-family: var(--font-primary, sans-serif);
+            }
+
             .function-card {
                 border-radius: 0;
                 max-height: 32px;
                 overflow: hidden;
                 display: flex;
                 align-items: center;
+                padding-left: 0.75rem;
+                background-color: var(--md-dark-surface-container-lowest);
+                color: var(--md-dark-on-surface);
                 transition: background-color 0.2s ease;
             }
 
             .function-card:hover {
-                background-color: #f1f1f1;
+                background-color: var(--md-dark-surface-container);
             }
 
             .function-card.active {
-                background-color: #e0e0e0;
-                border-left: 4px solid #1eaedb;
+                background-color: var(--md-dark-primary-container);
+                color: var(--md-dark-on-primary-container);
             }
 
             .param-name {
                 font-family: "Courier New", monospace;
-                background-color: rgba(30, 174, 219, 0.1);
+                background-color: var(--md-dark-primary-container);
+                color: var(--md-dark-on-primary-container);
                 padding: 0.1rem 0.3rem;
                 border-radius: 0;
             }
 
             .code-snippet {
                 font-family: "Courier New", monospace;
-                background-color: #f8f9fa;
+                background-color: var(--md-dark-surface-container);
                 padding: 0.75rem;
                 border-radius: 0;
-                border-left: 4px solid #1eaedb;
+                border-left: 4px solid var(--md-dark-primary);
                 overflow-x: auto;
             }
 
-            /* Responsive adjustments */
+            #functionDetails {
+                background-color: var(--md-dark-surface-container-highest);
+                color: var(--md-dark-on-surface);
+            }
+
+            #functionDetails h2 {
+                color: var(--md-dark-primary);
+            }
+
+            .material-icons {
+                color: var(--md-dark-primary);
+                font-size: 18px;
+                vertical-align: middle;
+            }
+
             @media (max-width: 768px) {
                 #detailsPanel {
                     display: none;
@@ -70,7 +96,7 @@
             }
         </style>
     </head>
-    <body class="bg-white text-gray-800 flex flex-col h-screen font-sans">
+    <body class="dark-theme flex flex-col h-screen font-sans">
         <header class="bg-header h-12 w-full flex items-center px-4 gap-4 fixed top-0 z-10 shadow-md">
             <div class="text-white text-lg font-bold whitespace-nowrap">UnLua Docs</div>
             <input id="searchInput" type="text" placeholder="Search functions..." class="flex-grow px-3 py-1 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary" />
@@ -167,8 +193,41 @@
             }
 
             function generateFunctionDetailsHTML(func) {
-                const params = func.parameters?.length ? `<h4 class="mt-4 font-semibold">Parameters</h4><ul class="list-disc list-inside">${func.parameters.map((p) => `<li>${p}</li>`).join("")}</ul>` : "";
-                return `<h2 class="text-xl font-bold text-primary">${func.name}</h2><div class="text-gray-600 mb-2">${func.class}</div><div class="mb-4">${func.description}</div>${params}`;
+                const rawDesc = func.description || "";
+                const mainDesc = rawDesc.split("@param")[0].trim();
+
+                const paramLines = [...rawDesc.matchAll(/@param\s+(\w+)\s+([^\@]*)/g)];
+                const returnLine = rawDesc.match(/@return\s+(.*)/);
+
+                const paramList = paramLines.length
+                    ? `<h4 class="mt-4 font-semibold flex items-center gap-1">
+                <span class="material-icons text-primary text-base">tune</span> Parameters
+            </h4>
+            <ul class="list-disc list-inside space-y-1 ml-6">
+                ${paramLines.map((p) => `<li><span class="param-name">${p[1]}</span> — ${p[2].trim()}</li>`).join("")}
+            </ul>`
+                    : "";
+
+                const returnSection = returnLine
+                    ? `<h4 class="mt-4 font-semibold flex items-center gap-1">
+                <span class="material-icons text-primary text-base">reply</span> Returns
+            </h4>
+            <p class="ml-6"><span class="param-name">${returnLine[1].trim()}</span></p>`
+                    : "";
+
+                return `
+        <h2 class="text-xl font-bold text-primary flex items-center gap-2">
+            <span class="material-icons text-primary text-lg">functions</span> ${func.name}
+        </h2>
+        <div class="text-gray-600 mb-2 ml-6 flex items-center gap-2">
+            <span class="material-icons text-sm text-gray-500">class</span> ${func.class}
+        </div>
+        <div class="mb-4 ml-6 text-gray-800 flex items-start gap-2">
+            <span class="material-icons text-sm text-primary">description</span> ${mainDesc}
+        </div>
+        ${paramList}
+        ${returnSection}
+    `;
             }
 
             function handleSearch() {

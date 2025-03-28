@@ -188,10 +188,13 @@
         background: none;
         border: none;
         color: var(--md-dark-on-surface-variant);
-        font-size: 0.9rem;
+        font-size: 1.2rem;
         cursor: pointer;
-        padding: 2px 6px;
+        padding: 4px;
         border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       
       .copy-button:hover {
@@ -318,7 +321,9 @@
               <h3><span class="material-icons">code</span> Example</h3>
               <div class="example-code-wrapper">
                 <pre class="example-code" id="code-${func.id}"><code>${code}</code></pre>
-                <button class="copy-button" onclick="copyCode('code-${func.id}')">Copy</button>
+                <button class="copy-button" onclick="copyCode('code-${func.id}', this)">
+                  <span class="material-icons">content_copy</span>
+                </button>
               </div>
             </div>
           `;
@@ -341,19 +346,20 @@
         `;
       }
 
-      function copyCode(elementId) {
+      function copyCode(elementId, button) {
         const codeElement = document.getElementById(elementId);
-        if (!codeElement) return;
+        if (!codeElement || !button) return;
       
         const text = codeElement.innerText;
         navigator.clipboard.writeText(text).then(() => {
-          const button = codeElement.nextElementSibling;
-          const originalText = button.innerText;
-          button.innerText = "Copied!";
-          setTimeout(() => (button.innerText = originalText), 1000);
+          const originalIcon = button.innerHTML;
+          button.innerHTML = '<span class="material-icons">check</span>'; // ✅
+          setTimeout(() => {
+            button.innerHTML = originalIcon;
+          }, 1000);
         });
       }
-
+      
       function handleSearch() {
         const query = searchInput.value.toLowerCase();
         const filtered = allFunctions.filter(

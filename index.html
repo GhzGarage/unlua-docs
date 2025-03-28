@@ -1,253 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>UnLua Docs</title>
-        <link rel="stylesheet" href="styleguide.css" />
-        <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        colors: {
-                            header: "#1A1F2C",
-                            primary: "#1EAEDB",
-                            secondary: "#F3F3F3",
-                        },
-                        fontFamily: {
-                            sans: ['"Exo 2"', "sans-serif"],
-                        },
-                    },
-                },
-            };
-        </script>
-        <style>
-            body {
-                background-color: var(--md-dark-surface);
-                color: var(--md-dark-on-surface);
-                font-family: var(--font-primary, sans-serif);
-            }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UnLua Docs</title>
+    <link rel="stylesheet" href="styleguide.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <style>
+      body {
+        background-color: var(--md-dark-surface);
+        color: var(--md-dark-on-surface);
+        font-family: var(--font-primary, sans-serif);
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
 
-            .function-card {
-                border-radius: 0;
-                max-height: 32px;
-                overflow: hidden;
-                display: flex;
-                align-items: center;
-                padding-left: 0.75rem;
-                background-color: var(--md-dark-surface-container-lowest);
-                color: var(--md-dark-on-surface);
-                transition: background-color 0.2s ease;
-            }
+      header {
+        background-color: var(--md-dark-surface-container-highest);
+        height: 48px;
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
+        gap: 1rem;
+        box-shadow: var(--md-elevation-2);
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 10;
+      }
 
-            .function-card:hover {
-                background-color: var(--md-dark-surface-container);
-            }
+      header input {
+        flex-grow: 1;
+        padding: 4px 12px;
+        background-color: var(--md-dark-surface-container);
+        color: var(--md-dark-on-surface);
+        border: none;
+        border-radius: 4px;
+      }
 
-            .function-card.active {
-                background-color: var(--md-dark-primary-container);
-                color: var(--md-dark-on-primary-container);
-            }
+      main {
+        display: flex;
+        flex-grow: 1;
+        margin-top: 48px;
+        overflow: hidden;
+      }
 
-            .param-name {
-                font-family: "Courier New", monospace;
-                background-color: var(--md-dark-primary-container);
-                color: var(--md-dark-on-primary-container);
-                padding: 0.1rem 0.3rem;
-                border-radius: 0;
-            }
+      #detailsPanel {
+        width: 30%;
+        padding: 1rem;
+        background-color: var(--md-dark-surface-container);
+        overflow-y: auto;
+      }
 
-            .code-snippet {
-                font-family: "Courier New", monospace;
-                background-color: var(--md-dark-surface-container);
-                padding: 0.75rem;
-                border-radius: 0;
-                border-left: 4px solid var(--md-dark-primary);
-                overflow-x: auto;
-            }
+      #functionDetails {
+        background-color: var(--md-dark-surface-container-highest);
+        padding: 1rem;
+        color: var(--md-dark-on-surface);
+        font-size: 0.9rem;
+      }
 
-            #functionDetails {
-                background-color: var(--md-dark-surface-container-highest);
-                color: var(--md-dark-on-surface);
-            }
+      #listPanel {
+        width: 70%;
+        overflow-y: auto;
+      }
 
-            #functionDetails h2 {
-                color: var(--md-dark-primary);
-            }
+      #functionsList {
+        font-size: 1rem;
+      }
 
-            .material-icons {
-                color: var(--md-dark-primary);
-                font-size: 18px;
-                vertical-align: middle;
-            }
+      .function-card {
+        height: 32px;
+        display: flex;
+        align-items: center;
+        padding-left: 12px;
+        background-color: var(--md-dark-surface-container-lowest);
+        color: var(--md-dark-info);
+        cursor: pointer;
+      }
 
-            @media (max-width: 768px) {
-                #detailsPanel {
-                    display: none;
-                }
+      .function-card:hover {
+        background-color: var(--md-dark-surface-container);
+      }
 
-                #listPanel {
-                    margin-left: 0;
-                    width: 100%;
-                }
-            }
-        </style>
-    </head>
-    <body class="dark-theme flex flex-col h-screen font-sans">
-        <header class="bg-header h-12 w-full flex items-center px-4 gap-4 fixed top-0 z-10 shadow-md">
-            <div class="text-white text-lg font-bold whitespace-nowrap">UnLua Docs</div>
-            <input id="searchInput" type="text" placeholder="Search functions..." class="flex-grow px-3 py-1 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary" />
-        </header>
+      .function-card.active {
+        background-color: var(--md-dark-primary-container);
+        color: var(--md-dark-on-primary-container);
+      }
 
-        <main class="flex flex-col md:flex-row mt-12 flex-grow overflow-hidden">
-            <section id="detailsPanel" class="md:w-[30%] p-4 bg-secondary border-r border-gray-300 overflow-y-auto hidden md:block">
-                <div id="functionDetails" class="bg-white p-4 shadow-sm text-sm text-gray-800">
-                    <p class="text-gray-500">Select a function to view details.</p>
-                </div>
-            </section>
+      .param-name {
+        font-family: "Courier New", monospace;
+        background-color: var(--md-dark-primary-container);
+        color: var(--md-dark-on-primary-container);
+        padding: 0.1rem 0.3rem;
+      }
 
-            <section id="listPanel" class="flex-grow overflow-y-auto md:w-[70%]">
-                <div id="functionsList" class="text-lg"></div>
-            </section>
-
-            <div id="mobileDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden items-center justify-center p-4">
-                <div class="bg-white w-full max-w-md shadow-lg max-h-[80vh] overflow-y-auto">
-                    <div class="flex justify-between items-center border-b px-4 py-2">
-                        <h3 class="font-bold text-lg">Function Details</h3>
-                        <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700">&times;</button>
-                    </div>
-                    <div id="mobileDetails" class="p-4 text-sm text-gray-800"></div>
-                </div>
-            </div>
-        </main>
-
-        <script>
-            let allFunctions = [];
-            let selectedFunction = null;
-
-            const functionsList = document.getElementById("functionsList");
-            const functionDetails = document.getElementById("functionDetails");
-            const mobileDetails = document.getElementById("mobileDetails");
-            const mobileDetailsModal = document.getElementById("mobileDetailsModal");
-            const closeModalBtn = document.getElementById("closeModalBtn");
-            const searchInput = document.getElementById("searchInput");
-            const detailsPanel = document.getElementById("detailsPanel");
-
-            document.addEventListener("DOMContentLoaded", initApp);
-            searchInput.addEventListener("input", handleSearch);
-            if (closeModalBtn) closeModalBtn.addEventListener("click", closeMobileModal);
-
-            async function initApp() {
-                try {
-                    const response = await fetch("unlua_functions.json");
-                    if (!response.ok) throw new Error("Failed to fetch data");
-                    const data = await response.json();
-
-                    allFunctions = data.map((func, index) => ({
-                        ...func,
-                        id: `${func.class}-${func.name}-${index}`,
-                    }));
-
-                    renderFunctionsList(allFunctions);
-                } catch (err) {
-                    functionsList.innerHTML = '<div class="text-red-500">Failed to load function data.</div>';
-                    console.error(err);
-                }
-            }
-
-            function renderFunctionsList(functions) {
-                if (functions.length === 0) {
-                    functionsList.innerHTML = "<p>No functions found.</p>";
-                    return;
-                }
-                functionsList.innerHTML = functions
-                    .map((func) => {
-                        const functionName = func.name.includes("::") ? func.name.split("::").pop() : func.name;
-                        return `<div class="function-card border py-2 pl-3 bg-white hover:bg-gray-100 cursor-pointer" data-id="${func.id}"><div class="font-semibold text-primary">${functionName}</div></div>`;
-                    })
-                    .join("");
-
-                document.querySelectorAll(".function-card").forEach((card) => {
-                    card.addEventListener("click", () => {
-                        const id = card.getAttribute("data-id");
-                        selectFunction(id);
-                    });
-                });
-            }
-
-            function selectFunction(id) {
-                selectedFunction = allFunctions.find((f) => f.id === id);
-                if (!selectedFunction) return;
-                const html = generateFunctionDetailsHTML(selectedFunction);
-                functionDetails.innerHTML = html;
-                mobileDetails.innerHTML = html;
-                if (window.innerWidth < 768) {
-                    mobileDetailsModal.classList.remove("hidden");
-                    mobileDetailsModal.classList.add("flex");
-                } else {
-                    detailsPanel.classList.remove("hidden");
-                }
-            }
-
-            function generateFunctionDetailsHTML(func) {
-                const rawDesc = func.description || "";
-                const mainDesc = rawDesc.split("@param")[0].trim();
-
-                const paramLines = [...rawDesc.matchAll(/@param\s+(\w+)\s+([^\@]*)/g)];
-                const returnLine = rawDesc.match(/@return\s+(.*)/);
-
-                const paramList = paramLines.length
-                    ? `<h4 class="mt-4 font-semibold flex items-center gap-1">
-                <span class="material-icons text-primary text-base">tune</span> Parameters
-            </h4>
-            <ul class="list-disc list-inside space-y-1 ml-6">
-                ${paramLines.map((p) => `<li><span class="param-name">${p[1]}</span> — ${p[2].trim()}</li>`).join("")}
-            </ul>`
-                    : "";
-
-                const returnSection = returnLine
-                    ? `<h4 class="mt-4 font-semibold flex items-center gap-1">
-                <span class="material-icons text-primary text-base">reply</span> Returns
-            </h4>
-            <p class="ml-6"><span class="param-name">${returnLine[1].trim()}</span></p>`
-                    : "";
-
-                return `
-        <h2 class="text-xl font-bold text-primary flex items-center gap-2">
-            <span class="material-icons text-primary text-lg">functions</span> ${func.name}
-        </h2>
-        <div class="text-gray-600 mb-2 ml-6 flex items-center gap-2">
-            <span class="material-icons text-sm text-gray-500">class</span> ${func.class}
+      .material-icons {
+        font-size: 18px;
+        vertical-align: middle;
+        color: var(--md-dark-primary);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div style="color: var(--md-dark-on-surface); font-weight: 600;">UnLua Docs</div>
+      <input id="searchInput" type="text" placeholder="Search functions..." />
+    </header>
+    <main>
+      <section id="detailsPanel">
+        <div id="functionDetails">
+          <p style="color: var(--md-dark-on-surface-variant);">Select a function to view details.</p>
         </div>
-        <div class="mb-4 ml-6 text-gray-800 flex items-start gap-2">
-            <span class="material-icons text-sm text-primary">description</span> ${mainDesc}
-        </div>
-        ${paramList}
-        ${returnSection}
-    `;
-            }
+      </section>
+      <section id="listPanel">
+        <div id="functionsList"></div>
+      </section>
+    </main>
+    <script>
+      let allFunctions = [];
+      let selectedFunction = null;
 
-            function handleSearch() {
-                const query = searchInput.value.toLowerCase();
-                const filtered = allFunctions.filter((f) => f.name.toLowerCase().includes(query) || f.class.toLowerCase().includes(query) || f.description.toLowerCase().includes(query));
-                renderFunctionsList(filtered);
-            }
+      const functionsList = document.getElementById("functionsList");
+      const functionDetails = document.getElementById("functionDetails");
+      const searchInput = document.getElementById("searchInput");
+      const detailsPanel = document.getElementById("detailsPanel");
 
-            function closeMobileModal() {
-                mobileDetailsModal.classList.add("hidden");
-            }
+      document.addEventListener("DOMContentLoaded", initApp);
+      searchInput.addEventListener("input", handleSearch);
 
-            window.addEventListener("resize", () => {
-                if (window.innerWidth >= 768) {
-                    mobileDetailsModal.classList.add("hidden");
-                    detailsPanel.classList.remove("hidden");
-                } else {
-                    detailsPanel.classList.add("hidden");
-                }
-            });
-        </script>
-    </body>
+      async function initApp() {
+        try {
+          const response = await fetch("unlua_functions.json");
+          if (!response.ok) throw new Error("Failed to fetch data");
+          const data = await response.json();
+
+          allFunctions = data.map((func, index) => ({
+            ...func,
+            id: `${func.class}-${func.name}-${index}`,
+          }));
+
+          renderFunctionsList(allFunctions);
+        } catch (err) {
+          functionsList.innerHTML = '<div style="color: var(--md-dark-error);">Failed to load function data.</div>';
+          console.error(err);
+        }
+      }
+
+      function renderFunctionsList(functions) {
+        if (functions.length === 0) {
+          functionsList.innerHTML = "<p>No functions found.</p>";
+          return;
+        }
+        functionsList.innerHTML = functions
+          .map((func) => {
+            const functionName = func.name.includes("::") ? func.name.split("::").pop() : func.name;
+            return `<div class="function-card" data-id="${func.id}"><div style="font-weight: 600;">${functionName}</div></div>`;
+          })
+          .join("");
+
+        document.querySelectorAll(".function-card").forEach((card) => {
+          card.addEventListener("click", () => {
+            const id = card.getAttribute("data-id");
+            selectFunction(id);
+          });
+        });
+      }
+
+      function selectFunction(id) {
+        selectedFunction = allFunctions.find((f) => f.id === id);
+        if (!selectedFunction) return;
+
+        document.querySelectorAll(".function-card").forEach((el) => el.classList.remove("active"));
+        const selectedCard = document.querySelector(`.function-card[data-id="${id}"]`);
+        if (selectedCard) selectedCard.classList.add("active");
+
+        const html = generateFunctionDetailsHTML(selectedFunction);
+        functionDetails.innerHTML = html;
+      }
+
+      function generateFunctionDetailsHTML(func) {
+        const rawDesc = func.description || "";
+        const mainDesc = rawDesc.split("@param")[0].trim();
+
+        const paramLines = [...rawDesc.matchAll(/@param\s+(\w+)\s+([^\@]*)/g)];
+        const returnLine = rawDesc.match(/@return\s+(.*)/);
+
+        const paramList = paramLines.length
+          ? `<h4 style="margin-top: 1rem;"><span class="material-icons">tune</span> Parameters</h4>
+             <ul style="padding-left: 1.5rem;">
+               ${paramLines.map((p) => `<li><span class="param-name">${p[1]}</span> — ${p[2].trim()}</li>`).join("")}
+             </ul>`
+          : "";
+
+        const returnSection = returnLine
+          ? `<h4 style="margin-top: 1rem;"><span class="material-icons">reply</span> Returns</h4>
+             <p><span class="param-name">${returnLine[1].trim()}</span></p>`
+          : "";
+
+        return `
+          <h2 style="font-size: 1.25rem; font-weight: bold;"><span class="material-icons">functions</span> ${func.name}</h2>
+          <div style="color: var(--md-dark-on-surface-variant); margin-bottom: 0.5rem;"><span class="material-icons">class</span> ${func.class}</div>
+          <div style="margin-bottom: 1rem;"><span class="material-icons">description</span> ${mainDesc}</div>
+          ${paramList}
+          ${returnSection}
+        `;
+      }
+
+      function handleSearch() {
+        const query = searchInput.value.toLowerCase();
+        const filtered = allFunctions.filter(
+          (f) =>
+            f.name.toLowerCase().includes(query) ||
+            f.class.toLowerCase().includes(query) ||
+            f.description.toLowerCase().includes(query)
+        );
+        renderFunctionsList(filtered);
+      }
+    </script>
+  </body>
 </html>

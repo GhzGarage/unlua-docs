@@ -140,7 +140,7 @@
                 functionsList.innerHTML = functions
                     .map((func) => {
                         const functionName = func.name.includes("::") ? func.name.split("::").pop() : func.name;
-                        return `<div class="function-card border py-2 .pl-3 bg-white hover:bg-gray-100 cursor-pointer" data-id="${func.id}"><div class="font-semibold text-primary">${functionName}</div></div>`;
+                        return `<div class="function-card border py-2 pl-3 bg-white hover:bg-gray-100 cursor-pointer" data-id="${func.id}"><div class="font-semibold text-primary">${functionName}</div></div>`;
                     })
                     .join("");
 

@@ -282,46 +282,49 @@
 
       function generateFunctionDetailsHTML(func) {
         const rawDesc = func.description || "";
-        const mainDesc = rawDesc.split("@param")[0].trim();
-        const paramLines = [...rawDesc.matchAll(/@param\s+(\w+)\s+([^\@]*)/g)];
-        const returnLine = rawDesc.match(/@return\s+(.*)/);
+        const mainDesc = rawDesc.trim();
+        const parameters = func.parameters || [];
       
-        const paramList = paramLines.length
+        const paramList = parameters.length
           ? `
             <div class="section">
               <h3><span class="material-icons">tune</span> Parameters</h3>
               <ul class="param-list">
-                ${paramLines.map((p) => `<li><span class="param-name">${p[1]}</span> — ${p[2].trim()}</li>`).join("")}
+                ${parameters.map(p => {
+                  const badge = p.out ? ' <em style="font-size:0.85em">(out)</em>' : '';
+                  return `<li><span class="param-name">${p.name}</span>${badge} — ${p.type}</li>`;
+                }).join('')}
               </ul>
             </div>
           `
-          : "";
+          : '';
       
-        const returnSection = returnLine
+        const returnType = func.returnType || 'void';
+        const returnSection = returnType.toLowerCase() !== 'void'
           ? `
             <div class="section">
               <h3><span class="material-icons">reply</span> Returns</h3>
-              <p><span class="param-name">${returnLine[1].trim()}</span></p>
+              <p><span class="param-name">${returnType}</span></p>
             </div>
           `
-          : "";
+          : '';
       
         const exampleCode = (() => {
-          const params = paramLines.map(p => p[1]).join(', ');
           const className = func.class;
           const functionName = func.name.includes("::") ? func.name.split("::").pop() : func.name;
-          const isVoid = returnLine ? returnLine[1].trim().toLowerCase() === 'void' : true;
-      
+          const paramStr = (func.parameters || []).map(p => p.name).join(', ');
+          const isVoid = (func.returnType || '').toLowerCase() === 'void';
+        
           const code = isVoid
-            ? `UE.${className}.${functionName}(${params})`
-            : `local result = UE.${className}.${functionName}(${params})`;
-      
+            ? `UE.${className}.${functionName}(${paramStr})`
+            : `local result = UE.${className}.${functionName}(${paramStr})`;
+        
           return `
             <div class="section">
               <h3><span class="material-icons">code</span> Example</h3>
               <div class="example-code-wrapper">
-                <pre class="example-code" id="code-${func.id}"><code>${code}</code></pre>
-                <button class="copy-button" onclick="copyCode('code-${func.id}', this)">
+                <pre class="example-code" id="code-${func.class}-${func.name}"><code>${code}</code></pre>
+                <button class="copy-button" onclick="copyCode('code-${func.class}-${func.name}', this)">
                   <span class="material-icons">content_copy</span>
                 </button>
               </div>

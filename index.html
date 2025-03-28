@@ -1,170 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>UnLua Docs</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            header: '#1A1F2C',
-            primary: '#1EAEDB',
-            secondary: '#F3F3F3',
-          },
-          fontFamily: {
-            sans: ['"Exo 2"', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
-</head>
-<body class="bg-white text-gray-800 flex flex-col h-screen font-sans">
-  <!-- Header -->
-  <header class="bg-header h-12 w-full flex items-center justify-between px-4 fixed top-0 z-10 shadow-md">
-    <div class="text-white text-lg font-bold">UnLua Docs</div>
-    <input id="searchInput" type="text" placeholder="Search functions..." class="ml-4 w-full max-w-md px-3 py-1 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"/>
-  </header>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>UnLua Docs</title>
+        <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            header: "#1A1F2C",
+                            primary: "#1EAEDB",
+                            secondary: "#F3F3F3",
+                        },
+                        fontFamily: {
+                            sans: ['"Exo 2"', "sans-serif"],
+                        },
+                    },
+                },
+            };
+        </script>
+        <style>
+            .function-card {
+                border-radius: 0;
+                max-height: 32px;
+                overflow: hidden;
+                display: flex;
+                align-items: center;
+                transition: background-color 0.2s ease;
+            }
 
-  <!-- Main -->
-  <main class="flex flex-col md:flex-row mt-12 flex-grow overflow-hidden">
-    <!-- Left Panel (Details) -->
-    <section id="detailsPanel" class="md:w-[30%] p-4 bg-secondary border-r border-gray-300 overflow-y-auto hidden md:block">
-      <div id="functionDetails" class="bg-white p-4 rounded shadow-sm text-sm text-gray-800">
-        <p class="text-gray-500">Select a function to view details.</p>
-      </div>
-    </section>
+            .function-card:hover {
+                background-color: #f1f1f1;
+            }
 
-    <!-- Right Panel (Function List) -->
-    <section id="listPanel" class="flex-grow overflow-y-auto p-4 md:w-[70%]">
-      <div id="functionsList" class="space-y-2 text-sm">
-        <!-- Function entries will go here -->
-      </div>
-    </section>
+            .function-card.active {
+                background-color: #e0e0e0;
+                border-left: 4px solid #1eaedb;
+            }
 
-    <!-- Mobile Modal -->
-    <div id="mobileDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden items-center justify-center p-4">
-      <div class="bg-white w-full max-w-md rounded shadow-lg max-h-[80vh] overflow-y-auto">
-        <div class="flex justify-between items-center border-b px-4 py-2">
-          <h3 class="font-bold text-lg">Function Details</h3>
-          <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700">&times;</button>
-        </div>
-        <div id="mobileDetails" class="p-4 text-sm text-gray-800">
-          <!-- Filled dynamically -->
-        </div>
-      </div>
-    </div>
-  </main>
+            .param-name {
+                font-family: "Courier New", monospace;
+                background-color: rgba(30, 174, 219, 0.1);
+                padding: 0.1rem 0.3rem;
+                border-radius: 0;
+            }
 
-  <script>
-    let allFunctions = [];
-    let selectedFunction = null;
+            .code-snippet {
+                font-family: "Courier New", monospace;
+                background-color: #f8f9fa;
+                padding: 0.75rem;
+                border-radius: 0;
+                border-left: 4px solid #1eaedb;
+                overflow-x: auto;
+            }
 
-    const functionsList = document.getElementById('functionsList');
-    const functionDetails = document.getElementById('functionDetails');
-    const mobileDetails = document.getElementById('mobileDetails');
-    const mobileDetailsModal = document.getElementById('mobileDetailsModal');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const searchInput = document.getElementById('searchInput');
-    const detailsPanel = document.getElementById('detailsPanel');
+            /* Responsive adjustments */
+            @media (max-width: 768px) {
+                #detailsPanel {
+                    display: none;
+                }
 
-    document.addEventListener('DOMContentLoaded', initApp);
-    searchInput.addEventListener('input', handleSearch);
-    if (closeModalBtn) closeModalBtn.addEventListener('click', closeMobileModal);
+                #listPanel {
+                    margin-left: 0;
+                    width: 100%;
+                }
+            }
+        </style>
+    </head>
+    <body class="bg-white text-gray-800 flex flex-col h-screen font-sans">
+        <header class="bg-header h-12 w-full flex items-center px-4 gap-4 fixed top-0 z-10 shadow-md">
+            <div class="text-white text-lg font-bold whitespace-nowrap">UnLua Docs</div>
+            <input id="searchInput" type="text" placeholder="Search functions..." class="flex-grow px-3 py-1 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary" />
+        </header>
 
-    async function initApp() {
-      try {
-        const response = await fetch('unlua_functions.json');
-        if (!response.ok) throw new Error('Failed to fetch data');
-        const data = await response.json();
+        <main class="flex flex-col md:flex-row mt-12 flex-grow overflow-hidden">
+            <section id="detailsPanel" class="md:w-[30%] p-4 bg-secondary border-r border-gray-300 overflow-y-auto hidden md:block">
+                <div id="functionDetails" class="bg-white p-4 shadow-sm text-sm text-gray-800">
+                    <p class="text-gray-500">Select a function to view details.</p>
+                </div>
+            </section>
 
-        allFunctions = data.map((func, index) => ({
-          ...func,
-          id: `${func.class}-${func.name}-${index}`
-        }));
+            <section id="listPanel" class="flex-grow overflow-y-auto p-4 md:w-[70%]">
+                <div id="functionsList" class="space-y-2 text-sm"></div>
+            </section>
 
-        renderFunctionsList(allFunctions);
-      } catch (err) {
-        functionsList.innerHTML = '<div class="text-red-500">Failed to load function data.</div>';
-        console.error(err);
-      }
-    }
+            <div id="mobileDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden items-center justify-center p-4">
+                <div class="bg-white w-full max-w-md shadow-lg max-h-[80vh] overflow-y-auto">
+                    <div class="flex justify-between items-center border-b px-4 py-2">
+                        <h3 class="font-bold text-lg">Function Details</h3>
+                        <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700">&times;</button>
+                    </div>
+                    <div id="mobileDetails" class="p-4 text-sm text-gray-800"></div>
+                </div>
+            </div>
+        </main>
 
-    function renderFunctionsList(functions) {
-      if (functions.length === 0) {
-        functionsList.innerHTML = '<p>No functions found.</p>';
-        return;
-      }
+        <script>
+            let allFunctions = [];
+            let selectedFunction = null;
 
-      functionsList.innerHTML = functions.map(func => `
-        <div class="function-card border px-3 py-2 rounded bg-white hover:bg-gray-100 cursor-pointer" data-id="${func.id}">
-          <div class="font-semibold text-primary">${func.name}</div>
-          <div class="text-xs text-gray-600">${func.class}</div>
-        </div>
-      `).join('');
+            const functionsList = document.getElementById("functionsList");
+            const functionDetails = document.getElementById("functionDetails");
+            const mobileDetails = document.getElementById("mobileDetails");
+            const mobileDetailsModal = document.getElementById("mobileDetailsModal");
+            const closeModalBtn = document.getElementById("closeModalBtn");
+            const searchInput = document.getElementById("searchInput");
+            const detailsPanel = document.getElementById("detailsPanel");
 
-      document.querySelectorAll('.function-card').forEach(card => {
-        card.addEventListener('click', () => {
-          const id = card.getAttribute('data-id');
-          selectFunction(id);
-        });
-      });
-    }
+            document.addEventListener("DOMContentLoaded", initApp);
+            searchInput.addEventListener("input", handleSearch);
+            if (closeModalBtn) closeModalBtn.addEventListener("click", closeMobileModal);
 
-    function selectFunction(id) {
-      selectedFunction = allFunctions.find(f => f.id === id);
-      if (!selectedFunction) return;
+            async function initApp() {
+                try {
+                    const response = await fetch("unlua_functions.json");
+                    if (!response.ok) throw new Error("Failed to fetch data");
+                    const data = await response.json();
 
-      const html = generateFunctionDetailsHTML(selectedFunction);
-      functionDetails.innerHTML = html;
-      mobileDetails.innerHTML = html;
+                    allFunctions = data.map((func, index) => ({
+                        ...func,
+                        id: `${func.class}-${func.name}-${index}`,
+                    }));
 
-      if (window.innerWidth < 768) {
-        mobileDetailsModal.classList.remove('hidden');
-        mobileDetailsModal.classList.add('flex');
-      } else {
-        detailsPanel.classList.remove('hidden');
-      }
-    }
+                    renderFunctionsList(allFunctions);
+                } catch (err) {
+                    functionsList.innerHTML = '<div class="text-red-500">Failed to load function data.</div>';
+                    console.error(err);
+                }
+            }
 
-    function generateFunctionDetailsHTML(func) {
-      const params = func.parameters?.length
-        ? `<h4 class="mt-4 font-semibold">Parameters</h4><ul class="list-disc list-inside">${func.parameters.map(p => `<li>${p}</li>`).join('')}</ul>`
-        : '';
+            function renderFunctionsList(functions) {
+                if (functions.length === 0) {
+                    functionsList.innerHTML = "<p>No functions found.</p>";
+                    return;
+                }
+                functionsList.innerHTML = functions.map((func) => `<div class="function-card border px-3 py-2 bg-white hover:bg-gray-100 cursor-pointer" data-id="${func.id}"><div class="font-semibold text-primary">${func.name}</div><div class="text-xs text-gray-600">${func.class}</div></div>`).join("");
+                document.querySelectorAll(".function-card").forEach((card) => {
+                    card.addEventListener("click", () => {
+                        const id = card.getAttribute("data-id");
+                        selectFunction(id);
+                    });
+                });
+            }
 
-      return `
-        <h2 class="text-xl font-bold text-primary">${func.name}</h2>
-        <div class="text-gray-600 mb-2">${func.class}</div>
-        <div class="mb-4">${func.description}</div>
-        ${params}
-      `;
-    }
+            function selectFunction(id) {
+                selectedFunction = allFunctions.find((f) => f.id === id);
+                if (!selectedFunction) return;
+                const html = generateFunctionDetailsHTML(selectedFunction);
+                functionDetails.innerHTML = html;
+                mobileDetails.innerHTML = html;
+                if (window.innerWidth < 768) {
+                    mobileDetailsModal.classList.remove("hidden");
+                    mobileDetailsModal.classList.add("flex");
+                } else {
+                    detailsPanel.classList.remove("hidden");
+                }
+            }
 
-    function handleSearch() {
-      const query = searchInput.value.toLowerCase();
-      const filtered = allFunctions.filter(f =>
-        f.name.toLowerCase().includes(query) ||
-        f.class.toLowerCase().includes(query) ||
-        f.description.toLowerCase().includes(query)
-      );
-      renderFunctionsList(filtered);
-    }
+            function generateFunctionDetailsHTML(func) {
+                const params = func.parameters?.length ? `<h4 class="mt-4 font-semibold">Parameters</h4><ul class="list-disc list-inside">${func.parameters.map((p) => `<li>${p}</li>`).join("")}</ul>` : "";
+                return `<h2 class="text-xl font-bold text-primary">${func.name}</h2><div class="text-gray-600 mb-2">${func.class}</div><div class="mb-4">${func.description}</div>${params}`;
+            }
 
-    function closeMobileModal() {
-      mobileDetailsModal.classList.add('hidden');
-    }
+            function handleSearch() {
+                const query = searchInput.value.toLowerCase();
+                const filtered = allFunctions.filter((f) => f.name.toLowerCase().includes(query) || f.class.toLowerCase().includes(query) || f.description.toLowerCase().includes(query));
+                renderFunctionsList(filtered);
+            }
 
-    window.addEventListener('resize', () => {
-      if (window.innerWidth >= 768) {
-        mobileDetailsModal.classList.add('hidden');
-        detailsPanel.classList.remove('hidden');
-      } else {
-        detailsPanel.classList.add('hidden');
-      }
-    });
-  </script>
-</body>
+            function closeMobileModal() {
+                mobileDetailsModal.classList.add("hidden");
+            }
+
+            window.addEventListener("resize", () => {
+                if (window.innerWidth >= 768) {
+                    mobileDetailsModal.classList.add("hidden");
+                    detailsPanel.classList.remove("hidden");
+                } else {
+                    detailsPanel.classList.add("hidden");
+                }
+            });
+        </script>
+    </body>
 </html>

@@ -37,6 +37,10 @@
         background-color: var(--md-dark-surface-container);
         color: var(--md-dark-on-surface);
         border: none;
+        height: 90%;
+        font-size: 1rem;
+        padding: 0 0.5rem;
+        box-sizing: border-box;
       }
 
       main {
@@ -53,12 +57,70 @@
         overflow-y: auto;
       }
 
-      #functionDetails {
-        background-color: var(--md-dark-surface-container-highest);
-        padding: 1rem;
-        color: var(--md-dark-on-surface);
-        font-size: 1.2rem;
-      }
+    #functionDetails {
+      background-color: var(--md-dark-surface-container-highest);
+      padding: 1.25rem;
+      color: var(--md-dark-on-surface);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    
+    .function-detail-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    
+    .function-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .function-class {
+      color: var(--md-dark-on-surface-variant);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+    }
+    
+    .function-description {
+      margin-top: 0.5rem;
+      color: var(--md-dark-on-surface);
+      font-size: 1rem;
+    }
+    
+    .section h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--md-dark-on-surface);
+    }
+    
+    .param-list {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+    }
+    
+    .param-list li {
+      margin-bottom: 0.3rem;
+    }
+    
+    .param-name {
+      font-family: "Courier New", monospace;
+      background-color: var(--md-dark-primary-container);
+      color: var(--md-dark-on-primary-container);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+    }
 
       #listPanel {
         width: 70%;
@@ -181,28 +243,37 @@
       function generateFunctionDetailsHTML(func) {
         const rawDesc = func.description || "";
         const mainDesc = rawDesc.split("@param")[0].trim();
-
         const paramLines = [...rawDesc.matchAll(/@param\s+(\w+)\s+([^\@]*)/g)];
         const returnLine = rawDesc.match(/@return\s+(.*)/);
-
+      
         const paramList = paramLines.length
-          ? `<h4 style="margin-top: 1rem;"><span class="material-icons">tune</span> Parameters</h4>
-             <ul style="padding-left: 1.5rem;">
-               ${paramLines.map((p) => `<li><span class="param-name">${p[1]}</span> — ${p[2].trim()}</li>`).join("")}
-             </ul>`
+          ? `
+            <div class="section">
+              <h3><span class="material-icons">tune</span> Parameters</h3>
+              <ul class="param-list">
+                ${paramLines.map((p) => `<li><span class="param-name">${p[1]}</span> — ${p[2].trim()}</li>`).join("")}
+              </ul>
+            </div>
+          `
           : "";
-
+      
         const returnSection = returnLine
-          ? `<h4 style="margin-top: 1rem;"><span class="material-icons">reply</span> Returns</h4>
-             <p><span class="param-name">${returnLine[1].trim()}</span></p>`
+          ? `
+            <div class="section">
+              <h3><span class="material-icons">reply</span> Returns</h3>
+              <p><span class="param-name">${returnLine[1].trim()}</span></p>
+            </div>
+          `
           : "";
-
+      
         return `
-          <h2 style="font-size: 1.25rem; font-weight: bold;"><span class="material-icons">functions</span> ${func.name}</h2>
-          <div style="color: var(--md-dark-on-surface-variant); margin-bottom: 0.5rem;"><span class="material-icons">class</span> ${func.class}</div>
-          <div style="margin-bottom: 1rem;"><span class="material-icons">description</span> ${mainDesc}</div>
-          ${paramList}
-          ${returnSection}
+          <div class="function-detail-card">
+            <h2 class="function-name"><span class="material-icons">functions</span> ${func.name}</h2>
+            <div class="function-class"><span class="material-icons">category</span> ${func.class}</div>
+            <div class="function-description">${mainDesc}</div>
+            ${paramList}
+            ${returnSection}
+          </div>
         `;
       }
 
